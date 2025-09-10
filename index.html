@@ -1,38 +1,38 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Rediscover ATKSPD Build Optimizer</title>
 <style>
   :root{
-    --bg:#1b130d; --ink:#e8d9bb; --muted:#b7a88c; --box:#2a2119; --line:#504230;
-    --frame:#d6c7a6; --good:#7bd389; --warn:#ffcf5a; --bad:#ff7a7a;
+    --bg:#1b130d;--ink:#e8d9bb;--muted:#b7a88c;--box:#2a2119;--line:#504230;--frame:#d6c7a6;
+    --good:#7bd389;--warn:#ffcf5a;--bad:#ff7a7a;
   }
-  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,system-ui,Inter,Segoe UI,Roboto,Arial,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,system-ui,Inter,Segoe UI,Roboto,Arial,sans-serif}
   h1{font-size:18px;margin:16px 12px}
-  .wrap{max-width:1150px;margin:0 auto;padding:8px}
+  .wrap{max-width:1200px;margin:0 auto;padding:8px}
   .panel{background:var(--box);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px}
-  label{font-size:12px;color:var(--muted);margin:4px 8px 4px 0}
-  input,select{padding:8px;border-radius:8px;border:1px solid var(--frame);background:#21170f;color:var(--ink)}
-  .btn{border:1px solid var(--frame);background:#23190f;color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer;margin:4px 6px}
+  label{font-size:12px;color:var(--muted);margin:4px 8px 4px 0;display:inline-block}
+  input,select{padding:6px;border-radius:6px;border:1px solid var(--frame);background:#21170f;color:var(--ink)}
   .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-  .grid{display:grid;gap:12px}
-  .grid-2{grid-template-columns:1fr 1fr}
+  .btn{border:1px solid var(--frame);background:#23190f;color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer;margin:4px 6px}
   table{border-collapse:collapse;width:100%}
-  th,td{border-bottom:1px solid #3a2f24;padding:6px;font-size:12px;text-align:right}
+  th,td{border-bottom:1px solid #3a2f24;padding:6px;font-size:12px;text-align:right;vertical-align:top}
   th:first-child,td:first-child{text-align:left}
-  .small{font-size:11px;color:var(--muted)}
   .pill{display:inline-block;border:1px solid var(--frame);border-radius:999px;padding:2px 8px;margin-left:6px}
   .ok{color:var(--good)} .meh{color:var(--warn)} .no{color:var(--bad)}
   canvas{max-width:100%;display:block;margin:10px auto;border-radius:12px;border:1px solid #402f22}
+  .muted{color:var(--muted)}
+  .subtitle{color:#d1c4a5;font-weight:600;margin:8px 0 4px}
+  .tag{display:inline-block;border:1px solid #6b5b45;border-radius:8px;padding:2px 6px;margin:2px 4px 0 0;color:#d6c7a6}
 </style>
 </head>
 <body>
 <h1>Rediscover ATKSPD Build Optimizer</h1>
 <div class="wrap">
 
-  <!-- Classes -->
+  <!-- Class toggles -->
   <div class="panel">
     <strong>Class</strong><br>
     <label><input type="radio" name="cls" value="Paladin"> Paladin</label>
@@ -41,7 +41,7 @@
     <label><input type="radio" name="cls" value="Berserker"> Berserker</label>
   </div>
 
-  <!-- Monster types -->
+  <!-- Monster toggles -->
   <div class="panel">
     <strong>Monster Types</strong><br>
     <label><input type="checkbox" value="Tank"> Tank</label>
@@ -52,74 +52,66 @@
     <label><input type="checkbox" value="Boss"> Boss</label>
   </div>
 
+  <!-- Runes -->
+  <div class="panel">
+    <strong>Runes</strong><br>
+    <label><input type="checkbox" id="evaRune"> +6% Evasion Rune</label>
+    <label><input type="checkbox" id="drRune"> +12% Damage Reduce Rune</label>
+  </div>
+
   <!-- Weapon -->
-  <div class="panel grid grid-2">
-    <div>
-      <label>Weapon Category</label><br>
-      <select id="weaponCat">
-        <option value="normal">Normal</option>
-        <option value="glacial">Glacial</option>
-        <option value="blaze">Blaze</option>
-        <option value="darkness">Darkness</option>
-        <option value="venom">Venom</option>
-      </select>
-    </div>
-    <div>
-      <label>Weapon Type</label><br>
-      <select id="weaponType"></select>
-    </div>
+  <div class="panel">
+    <label>Weapon Category</label>
+    <select id="weaponCat">
+      <option value="normal">Normal</option>
+      <option value="glacial">Glacial</option>
+      <option value="blaze">Blaze</option>
+      <option value="darkness">Darkness</option>
+      <option value="venom">Venom</option>
+    </select>
+    <label>Weapon Type</label>
+    <select id="weaponType"></select>
   </div>
 
   <!-- Targets & Weights -->
-  <div class="panel grid grid-2">
-    <div>
-      <label>Target ATK SPD</label>
-      <input id="t_atkspd" type="number" step="0.01" value="0.25">
-      <label>Target Evasion % (cap 40%)</label>
-      <input id="t_eva" type="number" step="1" value="40">
-      <label>Target Crit % (cap 50%)</label>
-      <input id="t_crit" type="number" step="1" value="50">
-    </div>
-    <div>
-      <label>Bonus Weights (applied after targets)</label>
-      <div class="row">
-        <span>Crit DMG</span><input id="w_cd" type="number" step="1" value="1" style="width:90px">
-        <span>ATK%</span><input id="w_atk" type="number" step="1" value="1" style="width:90px">
-        <span>Demon DMG</span><input id="w_dd" type="number" step="1" value="1" style="width:110px">
+  <div class="panel">
+    <div class="row">
+      <div>
+        <div class="subtitle">Targets (caps enforced)</div>
+        <div class="muted">ATK SPD target auto: 0.45 if Tank+Primal, else 0.25</div>
+        <label>Target Crit % (cap 50%)</label>
+        <input id="t_crit" type="number" step="1" value="50" style="width:90px">
       </div>
-      <p class="small">Higher = chase harder once ATK SPD / EVA / CRIT targets are met.</p>
+      <div>
+        <div class="subtitle">Bonus Weights</div>
+        Crit DMG <input id="w_cd" type="number" value="1" style="width:60px">
+        ATK% <input id="w_atk" type="number" value="1" style="width:60px">
+        Demon DMG <input id="w_dd" type="number" value="1" style="width:60px">
+      </div>
     </div>
+    <div id="status" class="pill">ready</div>
   </div>
 
-  <!-- Per-slot stat values -->
+  <!-- Auto-generated slot table -->
   <div class="panel">
-    <div class="row" style="justify-content:space-between">
-      <div>
-        <strong>Per-slot stat values</strong>
-        <div class="small">Enter the value for one line on that slot (leave blank/0 if not available). Boss weapons ignore this table.</div>
-      </div>
-      <div>
-        <button class="btn" id="fillDemo">Fill demo values</button>
-        <span id="slotNote" class="pill">8-slot mode</span>
-      </div>
+    <strong>Per-slot stats (auto-generated by gear type)</strong>
+    <div class="muted">Weapons can’t roll ATK SPD / Evasion / Crit. Chaos/Abyss show their 5th-pool options below the base stats.</div>
+    <div class="row" style="justify-content:space-between;align-items:center;margin-top:8px">
+      <div class="muted">Gear: <span id="gearLabel">Primal</span> • Limit: <span id="limitLabel">3</span> stats per piece<span id="extraLabel" class="muted"></span></div>
+      <button class="btn" id="regen">Regenerate for current gear</button>
     </div>
-    <div style="overflow:auto">
+    <div style="overflow:auto;max-height:360px">
       <table id="slotTable">
         <thead>
           <tr>
             <th>Slot</th>
-            <th>ATK SPD</th>
-            <th>Evasion %</th>
-            <th>Crit %</th>
-            <th>Crit DMG %</th>
-            <th>ATK %</th>
-            <th>Demon DMG %</th>
+            <th>Base stat lines (per line value)</th>
+            <th>5th-pool options (Chaos/Abyss)</th>
           </tr>
         </thead>
         <tbody id="slotRows"></tbody>
       </table>
     </div>
-    <p class="small">Rule: ≤4 stats per piece, no duplicate stat on the same piece.</p>
   </div>
 
   <!-- Actions -->
@@ -127,18 +119,17 @@
     <button class="btn" id="run">Optimize</button>
     <button class="btn" id="render">Render Picture</button>
     <button class="btn" id="save">Download PNG</button>
-    <span id="status" class="pill">ready</span>
   </div>
 
-  <!-- Result -->
+  <!-- Results -->
   <div class="panel">
-    <strong>Result (chosen lines)</strong>
+    <strong>Chosen stats per slot</strong>
     <div id="result">—</div>
   </div>
 
   <!-- Card -->
   <div class="panel">
-    <strong>Picture Preview</strong>
+    <strong>Printable Card</strong>
     <canvas id="card" width="1200" height="800"></canvas>
   </div>
 
@@ -148,9 +139,48 @@
 /* ===========================
    Data
 =========================== */
-const BASE_SLOTS = ["Helm","Chest","Gloves","Boots","Belt","Ring","Necklace","Weapon"];
-const STATS = ["atkspd","eva","crit","critdmg","atkpct","demondmg"];
+const BASE_SLOTS = ["Weapon","Necklace","Helm","Chest","Ring","Belt","Gloves","Boots"];
+const SHOW_STATS_ORDER = ["atkspd","eva","crit","critdmg","atkpct","demondmg","hp","def","dr"];
 
+const LABELS = {
+  atkspd:"ATK SPD", eva:"Evasion", crit:"Crit", critdmg:"Crit DMG",
+  atkpct:"ATK%", demondmg:"Demon DMG", hp:"HP", def:"DEF", dr:"Damage Reduce",
+  mats:"Chance High-Class Mats", bossdmg:"Boss Damage"
+};
+
+// Real per-line values (from your sheet)
+const POOLS = {
+  Primal:   { atkspd:0.12, eva:12, crit:12, atkpct:23, critdmg:35, hp:23, def:23, dr:14, demondmg:0 },
+  Original: { atkspd:0.12, eva:12, crit:12, atkpct:23, critdmg:35, hp:23, def:23, dr:17, demondmg:0 },
+  Chaos:    { atkspd:0.14, eva:14, crit:14, atkpct:26, critdmg:40, hp:26, def:26, dr:19, demondmg:0 },
+  Abyss:    { atkspd:0.16, eva:16, crit:16, atkpct:29, critdmg:45, hp:29, def:29, dr:21, demondmg:0 }
+};
+
+// Extra pool — store as actual effects (objects), not strings
+const EXTRA_POOL = {
+  Chaos: {
+    Chest:    [{atkpct:26},{dr:19},{mats:26}],
+    Gloves:   [{atkpct:26},{dr:19},{mats:26}],
+    Boots:    [{atkpct:26},{dr:19},{mats:26}],
+    Belt:     [{hp:26},{bossdmg:40},{mats:26}],
+    Helm:     [{hp:26},{bossdmg:40},{mats:26}],
+    Necklace: [{critdmg:40},{mats:26}], // evasion excluded
+    Ring:     [{critdmg:40},{mats:26}],
+    Weapon:   [{critdmg:80},{hp:52},{mats:26}]
+  },
+  Abyss: {
+    Chest:    [{atkpct:29},{dr:21},{mats:29}],
+    Gloves:   [{atkpct:29},{dr:21},{mats:29}],
+    Boots:    [{atkpct:29},{dr:21},{mats:29}],
+    Belt:     [{hp:29},{bossdmg:45},{mats:29}],
+    Helm:     [{hp:29},{bossdmg:45},{mats:29}],
+    Necklace: [{critdmg:45},{mats:29}], // evasion excluded
+    Ring:     [{critdmg:45},{mats:29}],
+    Weapon:   [{mats:29}] // TBDs unknown; keep mats only for now
+  }
+};
+
+// Boss weapons (summary)
 const BOSS_WEAPONS = {
   glacial:{
     Sword:{name:"Glacial Sword",stats:["ATK% +14–26","Damage vs Monsters +25–40","Crit DMG +25–40"],skill:"Chance to cast Rampage"},
@@ -175,285 +205,342 @@ const BOSS_WEAPONS = {
   }
 };
 
-const NORMAL_WEAPON_TYPES = ["Primal","Abyss","Chaos","Original"];
-
 /* ===========================
-   Build UI table
+   UI wiring
 =========================== */
-const rowsEl = document.getElementById('slotRows');
-
-function currentMode(){ // returns {boss:boolean, slots:string[], bossInfo?}
-  const cat = document.getElementById('weaponCat').value;
-  const wt  = document.getElementById('weaponType').value;
-  if (cat === 'normal'){
-    return { boss:false, slots:[...BASE_SLOTS] };
-  }
-  const info = (BOSS_WEAPONS[cat]||{})[wt];
-  return { boss:true, slots:BASE_SLOTS.filter(s=>s!=="Weapon"), bossInfo:info };
-}
-
-function drawSlotTable(){
-  rowsEl.innerHTML='';
-  const {boss, slots} = currentMode();
-  document.getElementById('slotNote').textContent = boss ? '7-slot mode (boss weapon)' : '8-slot mode';
-  slots.forEach((name,idx)=>{
-    const tr = document.createElement('tr');
-    const first = document.createElement('td');
-    first.textContent = name; tr.appendChild(first);
-    STATS.forEach(stat=>{
-      const td = document.createElement('td');
-      const inp = document.createElement('input');
-      inp.type='number'; inp.step='0.01'; inp.min='0';
-      inp.dataset.slot=name; inp.dataset.stat=stat; inp.style.width='80px';
-      tr.appendChild(td); td.appendChild(inp);
-    });
-    rowsEl.appendChild(tr);
-  });
-}
-
-/* weapon dropdowns */
 const catSel = document.getElementById('weaponCat');
 const typeSel = document.getElementById('weaponType');
+const slotRows = document.getElementById('slotRows');
+const gearLabel = document.getElementById('gearLabel');
+const limitLabel = document.getElementById('limitLabel');
+const extraLabel = document.getElementById('extraLabel');
+
 function updateTypes(){
-  typeSel.innerHTML='';
-  if (catSel.value==='normal'){
-    NORMAL_WEAPON_TYPES.forEach(k=>{ const o=document.createElement('option');o.value=k;o.textContent=k;typeSel.appendChild(o);});
+  typeSel.innerHTML = '';
+  if (catSel.value === 'normal'){
+    ['Primal','Original','Chaos','Abyss'].forEach(k=>{
+      const o=document.createElement('option');o.value=k;o.textContent=k;typeSel.appendChild(o);
+    });
   } else {
-    Object.keys(BOSS_WEAPONS[catSel.value]).forEach(k=>{ const o=document.createElement('option');o.value=k;o.textContent=k;typeSel.appendChild(o);});
+    Object.keys(BOSS_WEAPONS[catSel.value]).forEach(k=>{
+      const o=document.createElement('option');o.value=k;o.textContent=k;typeSel.appendChild(o);
+    });
   }
-  drawSlotTable();
+  buildSlotTable();
 }
 catSel.onchange = updateTypes;
-updateTypes();
-typeSel.onchange = drawSlotTable;
 
-/* demo filler (normal-ish values; edit later) */
-document.getElementById('fillDemo').onclick = ()=>{
-  const approx = {
-    atkspd : {Helm:0.05, Gloves:0.05, Necklace:0.05, Weapon:0.10},
-    eva    : {Helm:10, Chest:8, Boots:12, Belt:6, Ring:6},
-    crit   : {Helm:8, Gloves:10, Belt:6, Ring:12, Necklace:8},
-    critdmg:{Helm:20, Chest:25, Gloves:15, Boots:15, Belt:10, Ring:20, Necklace:10, Weapon:15},
-    atkpct : {Helm:8, Chest:12, Gloves:10, Boots:8, Belt:10, Ring:8, Necklace:12, Weapon:20},
-    demondmg:{Helm:10, Chest:10, Gloves:12, Boots:8, Belt:10, Ring:8, Necklace:10, Weapon:15}
-  };
-  document.querySelectorAll('#slotTable input').forEach(inp=>{
-    const slot = inp.dataset.slot, st = inp.dataset.stat;
-    const v = (approx[st]||{})[slot] ?? 0;
-    inp.value = v;
-  });
-};
+/* ===========================
+   Table generation
+=========================== */
+function weaponRestricted(stat){ return (stat==='atkspd'||stat==='eva'||stat==='crit'); }
+
+function buildSlotTable(){
+  slotRows.innerHTML='';
+  const isBoss = (catSel.value!=='normal');
+  const gearType = isBoss ? 'Primal' : typeSel.value || 'Primal';
+  gearLabel.textContent = gearType;
+  limitLabel.textContent = (gearType==='Primal') ? '3' : (gearType==='Original' ? '4' : '5 (4+extra)');
+  extraLabel.textContent = (gearType==='Chaos'||gearType==='Abyss') ? ' • Extra 5th-pool active' : '';
+
+  for (const slot of BASE_SLOTS){
+    const tr=document.createElement('tr');
+    const tdSlot=document.createElement('td'); tdSlot.textContent=slot; tr.appendChild(tdSlot);
+
+    // Base stats list
+    const baseTd=document.createElement('td'); baseTd.style.textAlign='left';
+    const ul1=document.createElement('div');
+    const baseKeys = Object.keys(POOLS[gearType]||{});
+    baseKeys.forEach(st=>{
+      if (slot==='Weapon' && weaponRestricted(st)) return;
+      const v = POOLS[gearType][st];
+      const show = (st==='atkspd') ? `${LABELS[st]}: ${v.toFixed(2)}` : `${LABELS[st]}: +${v}%`;
+      const span=document.createElement('span'); span.className='tag'; span.textContent=show;
+      ul1.appendChild(span);
+    });
+    baseTd.appendChild(ul1);
+    tr.appendChild(baseTd);
+
+    // Extra pool list
+    const extraTd=document.createElement('td'); extraTd.style.textAlign='left';
+    const ul2=document.createElement('div');
+    if (gearType==='Chaos' || gearType==='Abyss'){
+      const extras = (EXTRA_POOL[gearType]||{})[slot]||[];
+      if (extras.length){
+        extras.forEach(obj=>{
+          const key = Object.keys(obj)[0];
+          const val = obj[key];
+          const show = (key==='atkspd') ? `${LABELS[key]}: ${val.toFixed(2)}`
+                        : (key==='mats') ? `${LABELS[key]}: +${val}%`
+                        : `${LABELS[key]||key}: +${val}%`;
+          const span=document.createElement('span'); span.className='tag'; span.textContent=show;
+          ul2.appendChild(span);
+        });
+      } else {
+        const span=document.createElement('span'); span.className='muted'; span.textContent='—';
+        ul2.appendChild(span);
+      }
+    } else {
+      const span=document.createElement('span'); span.className='muted'; span.textContent='—';
+      ul2.appendChild(span);
+    }
+    extraTd.appendChild(ul2);
+    tr.appendChild(extraTd);
+
+    slotRows.appendChild(tr);
+  }
+}
+typeSel.onchange = buildSlotTable;
+document.getElementById('regen').onclick = buildSlotTable;
+updateTypes();
 
 /* ===========================
    Optimizer
 =========================== */
-// collect matrix values
-function readMatrix(){
-  const m = {};
-  document.querySelectorAll('#slotTable input').forEach(inp=>{
-    const v = parseFloat(inp.value);
-    if (!isNaN(v) && v>0){
-      if (!m[inp.dataset.slot]) m[inp.dataset.slot] = {};
-      m[inp.dataset.slot][inp.dataset.stat] = v;
-    }
-  });
-  return m;
-}
+function combosOf(gearType, slot){
+  // base choices (keys from POOLS) respecting weapon restriction
+  const baseKeys = Object.keys(POOLS[gearType]||{});
+  let keys = baseKeys.filter(k => !(slot==='Weapon' && weaponRestricted(k)));
 
-function combosOf(slotObj, max=4){
-  const keys = Object.keys(slotObj||{});
-  const out = [[]];
-  for (const k of keys){
-    const cur = out.length;
-    for (let i=0;i<cur;i++){
-      if (out[i].length<max) out.push(out[i].concat(k));
+  // generate up to limit base stats
+  const baseLimit = (gearType==='Primal') ? 3 : 4;
+  let out=[[]];
+  for(const k of keys){
+    const cur=out.length;
+    for(let i=0;i<cur;i++){
+      if(out[i].length<baseLimit) out.push(out[i].concat({[k]:POOLS[gearType][k]}));
     }
   }
-  return out.filter(c=>c.length>0 && c.length<=max);
-}
 
-function scoreState(rem, bonusSum, weights){
-  const pen = 1000*Math.max(0,rem.atkspd) + 15*Math.max(0,rem.eva) + 15*Math.max(0,rem.crit);
-  const bonus = - (weights.cd*bonusSum.critdmg + weights.atk*bonusSum.atkpct + weights.dd*bonusSum.demondmg);
-  return pen + bonus;
+  // extra pool (Chaos/Abyss): add exactly one extra option
+  if (gearType==='Chaos' || gearType==='Abyss'){
+    const extras=(EXTRA_POOL[gearType]||{})[slot]||[];
+    const withExtra=[];
+    if (extras.length){
+      out.forEach(c=>{
+        extras.forEach(extraObj=>{
+          withExtra.push([...c, extraObj]);
+        });
+      });
+      out = out.concat(withExtra);
+    }
+  }
+  // filter by max length (Chaos/Abyss allow 5 total)
+  const maxLen = (gearType==='Chaos' || gearType==='Abyss') ? 5 : baseLimit;
+  return out.filter(c=>c.length>0 && c.length<=maxLen);
 }
-
-function nameStat(k){ return ({atkspd:"ATK SPD",eva:"Evasion",crit:"Crit",critdmg:"Crit DMG",atkpct:"ATK%",demondmg:"Demon DMG"})[k]||k; }
 
 function optimize(){
-  const {boss, slots} = currentMode();
-  const t_atkspd = parseFloat(document.getElementById('t_atkspd').value)||0.25;
-  const t_eva = Math.min(40, parseFloat(document.getElementById('t_eva').value)||40);
-  const t_crit = Math.min(50, parseFloat(document.getElementById('t_crit').value)||50);
+  const gearType = (catSel.value==='normal') ? (typeSel.value||'Primal') : 'Primal';
+  const bossMode = (catSel.value!=='normal');
+
+  // Attack speed target rule
+  const monsters=[...document.querySelectorAll('input[type="checkbox"]:checked')].map(cb=>cb.value);
+  const tankMode = monsters.includes('Tank');
+  let atkspdTarget = 0.25;
+  if (gearType==='Primal' && tankMode) atkspdTarget = 0.45;
+
+  // Caps (runes applied to targets)
+  const evaRune = document.getElementById('evaRune').checked;
+  const drRune  = document.getElementById('drRune').checked;
+  const evaTarget = Math.max(0, 40 - (evaRune?6:0));
+  const drTarget = tankMode ? Math.max(0, 100 - (drRune?12:0)) : 0;
+  const critTarget = Math.min(50, parseFloat(document.getElementById('t_crit').value)||50);
+
+  // Weights
   const weights = {
     cd: parseFloat(document.getElementById('w_cd').value)||1,
     atk: parseFloat(document.getElementById('w_atk').value)||1,
-    dd: parseFloat(document.getElementById('w_dd').value)||1,
+    dd: parseFloat(document.getElementById('w_dd').value)||1
   };
 
-  const matrixAll = readMatrix();
-  const matrix = {}; // restrict to active slots
-  slots.forEach(s=>{ matrix[s] = matrixAll[s]||{}; });
+  // If boss weapon: show summary and exit (no optimization)
+  if (bossMode){
+    const fam = catSel.value, wt = typeSel.value;
+    const w = (BOSS_WEAPONS[fam]||{})[wt];
+    document.getElementById('result').innerHTML = w
+      ? `<div><strong>${w.name}</strong></div><div>${w.stats.join(', ')}</div><div>${w.skill}</div><div class="muted">7-slot optimization (weapon fixed)</div>`
+      : 'Boss weapon selected';
+    // Status bar (no rem since we didn’t optimize)
+    document.getElementById('status').innerHTML = 'Boss weapon selected — run with normal gear to optimize.';
+    window.__plan = null;
+    return;
+  }
 
-  let rem = {atkspd:t_atkspd, eva:t_eva, crit:t_crit};
-  let bonus = {critdmg:0, atkpct:0, demondmg:0};
-  const pick = {}; // slot -> [stats]
+  // Remaining targets
+  let rem = { atkspd: atkspdTarget, eva: evaTarget, crit: critTarget, dr: drTarget };
+  let totals = { atkspd:0, eva:0, crit:0, critdmg:0, atkpct:0, demondmg:0, hp:0, def:0, dr:0, mats:0, bossdmg:0 };
+  let pick = {};
 
-  for (const s of slots){
-    const avail = matrix[s]||{};
-    const cands = combosOf(avail,4);
-    cands.push([]); // allow choosing nothing
+  // Scoring: hard penalties for missing targets; then bonuses favor HP/DEF, then ATK%/Crit/CritDmg/Demon
+  function scoreState(remain, sum){
+    const hard = 1800*remain.atkspd + 25*remain.eva + 25*remain.crit + 60*remain.dr;
+    const soft = - ( 0.7*sum.hp + 0.7*sum.def
+                   + weights.atk*sum.atkpct + weights.cd*sum.critdmg + weights.dd*sum.demondmg
+                   + 0.2*sum.bossdmg ); // boss dmg light bonus
+    return hard + soft;
+  }
 
-    let bestC = []; let bestScore = Infinity; let bestRem=rem, bestBonus=bonus;
+  for (const slot of BASE_SLOTS){
+    const cands = combosOf(gearType, slot);
+    let best = null, bestScore = Infinity;
 
-    for (const c of cands){
-      const add = {atkspd:0,eva:0,crit:0,critdmg:0,atkpct:0,demondmg:0};
-      for (const st of c){
-        const v = avail[st]||0;
-        if (st==="atkspd"||st==="eva"||st==="crit"){
-          const need = rem[st];
-          add[st] = Math.max(0, Math.min(v, need));
-        } else add[st]+=v;
+    for (const choice of cands){
+      // Sum contributions from this slot
+      const add = { atkspd:0,eva:0,crit:0,critdmg:0,atkpct:0,demondmg:0,hp:0,def:0,dr:0,mats:0,bossdmg:0 };
+      for (const ent of choice){
+        const key = Object.keys(ent)[0];
+        const val = ent[key];
+        if (key==='atkspd'){ add.atkspd += val; }
+        else if (key in add){ add[key] += val; }
+        // unknown keys ignored
       }
+
+      // Clamp helpful parts for hard targets
+      const helpful = {
+        atkspd: Math.max(0, Math.min(add.atkspd, rem.atkspd)),
+        eva   : Math.max(0, Math.min(add.eva, rem.eva)),
+        crit  : Math.max(0, Math.min(add.crit, rem.crit)),
+        dr    : Math.max(0, Math.min(add.dr, rem.dr)),
+        // bonuses pass-through
+        critdmg:add.critdmg, atkpct:add.atkpct, demondmg:add.demondmg, hp:add.hp, def:add.def, mats:add.mats, bossdmg:add.bossdmg
+      };
+
       const newRem = {
-        atkspd: Math.max(0, rem.atkspd - add.atkspd),
-        eva   : Math.max(0, rem.eva    - add.eva),
-        crit  : Math.max(0, rem.crit   - add.crit),
+        atkspd: Math.max(0, rem.atkspd - helpful.atkspd),
+        eva   : Math.max(0, rem.eva    - helpful.eva),
+        crit  : Math.max(0, rem.crit   - helpful.crit),
+        dr    : Math.max(0, rem.dr     - helpful.dr)
       };
-      const newBonus = {
-        critdmg: bonus.critdmg + add.critdmg,
-        atkpct : bonus.atkpct  + add.atkpct,
-        demondmg: bonus.demondmg + add.demondmg,
-      };
-      const sc = scoreState(newRem,newBonus,weights);
-      if (sc<bestScore){ bestScore=sc; bestC=c; bestRem=newRem; bestBonus=newBonus; }
+      const newTotals = { ...totals };
+      Object.keys(newTotals).forEach(k=> newTotals[k]+=helpful[k]||0);
+
+      const sc = scoreState(newRem, newTotals);
+      if (sc < bestScore){
+        bestScore = sc;
+        best = { choice, newRem, newTotals };
+      }
     }
-    pick[s] = bestC;
-    rem = bestRem; bonus = bestBonus;
+
+    pick[slot] = best.choice;
+    rem = best.newRem;
+    totals = best.newTotals;
   }
 
-  // status & result
-  const hitAtk = rem.atkspd<=1e-6, hitEva=rem.eva<=1e-6, hitCrit=rem.crit<=1e-6;
-  document.getElementById('status').innerHTML =
-    `ATK SPD <span class="${hitAtk?'ok':(rem.atkspd<0.05?'meh':'no')}">${hitAtk?'OK':`need ${rem.atkspd.toFixed(2)}`}</span>`
-    + ` • Evasion <span class="${hitEva?'ok':(rem.eva<5?'meh':'no')}">${hitEva?'OK':`need ${rem.eva.toFixed(1)}%`}</span>`
-    + ` • Crit <span class="${hitCrit?'ok':(rem.crit<5?'meh':'no')}">${hitCrit?'OK':`need ${rem.crit.toFixed(1)}%`}</span>`
-    + ` • Bonus: CD ${bonus.critdmg.toFixed(0)} | ATK% ${bonus.atkpct.toFixed(0)} | Demon ${bonus.demondmg.toFixed(0)}`;
+  // Status bar
+  const s = [];
+  s.push(`ATK SPD <span class="${rem.atkspd<=1e-6?'ok':(rem.atkspd<0.05?'meh':'no')}">${rem.atkspd<=1e-6?'OK':`need ${rem.atkspd.toFixed(2)}`}</span>`);
+  s.push(`Evasion <span class="${rem.eva<=1e-6?'ok':(rem.eva<5?'meh':'no')}">${rem.eva<=1e-6?'OK':`need ${rem.eva.toFixed(1)}%`}</span>`);
+  s.push(`Crit <span class="${rem.crit<=1e-6?'ok':(rem.crit<5?'meh':'no')}">${rem.crit<=1e-6?'OK':`need ${rem.crit.toFixed(1)}%`}</span>`);
+  s.push(`DR <span class="${rem.dr<=1e-6?'ok':(rem.dr<12?'meh':'no')}">${rem.dr<=1e-6?'OK':`need ${rem.dr.toFixed(1)}%`}</span>`);
+  document.getElementById('status').innerHTML = s.join(' • ');
 
-  const lines = [];
-  for (const s of slots){
-    const arr = pick[s]||[];
-    const text = arr.length? arr.map(st=>{
-      const v = (matrix[s]||{})[st]||0;
-      const suf = (st==="atkspd")?'':'%';
-      return `${nameStat(st)} +${v}${suf}`;
-    }).join(', ') : '—';
-    lines.push(`<div><strong>${s}</strong>: ${text}</div>`);
+  // Human-readable pick list
+  const pretty = [];
+  for (const slot of BASE_SLOTS){
+    const arr = pick[slot]||[];
+    const bits = arr.map(ent=>{
+      const k = Object.keys(ent)[0]; const v = ent[k];
+      if (k==='atkspd') return `${LABELS[k]} +${v.toFixed(2)}`;
+      if (k==='mats')   return `${LABELS[k]} +${v}%`;
+      return `${LABELS[k]||k} +${v}%`;
+    });
+    pretty.push(`<div><strong>${slot}</strong>: ${bits.length?bits.join(', '):'—'}</div>`);
   }
-  document.getElementById('result').innerHTML = lines.join('');
+  document.getElementById('result').innerHTML = pretty.join('');
 
-  window.__plan = {pick, bonus, rem, targets:{t_atkspd,t_eva,t_crit}, slots, matrix};
-  return window.__plan;
+  // Save plan for card
+  window.__plan = { pick, totals, rem, gearType, atkspdTarget, evaTarget, drTarget, critTarget };
 }
 
 /* ===========================
-   Render Card
+   Card rendering
 =========================== */
 function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();ctx.strokeStyle='#d6c7a6';ctx.lineWidth=4;ctx.stroke();}
 
-function renderCard(plan){
+function renderCard(){
+  const P = window.__plan;
   const C = document.getElementById('card'), ctx=C.getContext('2d');
-  const cat = document.getElementById('weaponCat').value;
-  const wt  = document.getElementById('weaponType').value;
-  const boss = (cat!=='normal');
-  const cls = document.querySelector('input[name="cls"]:checked').value;
-  const types = [...document.querySelectorAll('input[type="checkbox"]:checked')].map(x=>x.value);
-
-  // bg & frame
   ctx.fillStyle='#1b130d'; ctx.fillRect(0,0,C.width,C.height);
   roundRect(ctx,20,20,C.width-40,C.height-40,18);
 
-  // header
+  // Header
   ctx.fillStyle='#e8d9bb'; ctx.font='28px ui-sans-serif, -apple-system';
   ctx.fillText('Rediscover — Optimized Build', 40, 70);
-  ctx.font='16px ui-sans-serif, -apple-system'; ctx.fillStyle='#b7a88c';
-  ctx.fillText(`Class: ${cls}  •  Types: ${types.join(', ')||'None'}`, 40, 98);
+  ctx.font='16px ui-sans-serif'; ctx.fillStyle='#b7a88c';
+  const cls = document.querySelector('input[name="cls"]:checked').value;
+  const monsters=[...document.querySelectorAll('input[type="checkbox"]:checked')].map(cb=>cb.value).join(', ') || 'None';
+  ctx.fillText(`Class: ${cls} • Types: ${monsters}`, 40, 98);
 
-  // targets
-  const t=plan.targets;
-  ctx.fillText(`Targets  ATK SPD ${t.t_atkspd.toFixed(2)}  •  Evasion ${t.t_eva}%  •  Crit ${t.t_crit}%`, 40, 125);
+  // Targets line
+  const evaRune = document.getElementById('evaRune').checked;
+  const drRune = document.getElementById('drRune').checked;
+  ctx.fillText(`Targets: ATK SPD ${P.atkspdTarget.toFixed(2)} • Evasion ${P.evaTarget}${evaRune?'+6 rune':''}% • Crit ${P.critTarget}% • DR ${P.drTarget}${drRune?'+12 rune':''}%`, 40, 122);
 
-  // columns
-  const colX=[40, 540, 900];
+  // Columns
+  const x1=40, x2=540, x3=860; let y=150;
   ctx.fillStyle='#c9bda1'; ctx.font='18px ui-sans-serif';
-  ctx.fillText('Gear & Stats', colX[0], 155);
-  ctx.fillText('Totals', colX[1], 155);
-  ctx.fillText('Weapon', colX[2], 155);
+  ctx.fillText('Gear & Lines', x1, y);
+  ctx.fillText('Totals', x2, y);
+  ctx.fillText('Checks', x3, y);
+  y += 10;
 
-  // gear
-  let y=182; ctx.fillStyle='#e8d9bb'; ctx.font='16px ui-sans-serif';
-  for (const s of plan.slots){
-    ctx.fillStyle='#e8d9bb'; ctx.fillText(s, colX[0], y);
-    const arr=(plan.pick[s]||[]);
-    const txt = arr.length? arr.map(st=>{
-      const v = (plan.matrix[s]||{})[st]||0; const suf=(st==='atkspd')?'':'%'; return `${nameStat(st)} +${v}${suf}`;
+  // Gear listing
+  ctx.font='16px ui-sans-serif'; let gy = y+24;
+  for (const slot of BASE_SLOTS){
+    const arr=(P.pick||{})[slot]||[];
+    ctx.fillStyle='#e8d9bb'; ctx.fillText(slot, x1, gy);
+    const txt = arr.length? arr.map(ent=>{
+      const k=Object.keys(ent)[0]; const v=ent[k];
+      if (k==='atkspd') return `${LABELS[k]} +${v.toFixed(2)}`;
+      if (k==='mats')   return `${LABELS[k]} +${v}%`;
+      return `${LABELS[k]||k} +${v}%`;
     }).join('  •  ') : '—';
-    ctx.fillStyle='#b7a88c'; ctx.fillText(txt, colX[0]+130, y);
-    y+=28;
+    ctx.fillStyle='#b7a88c'; ctx.fillText(txt, x1+130, gy);
+    gy += 26;
   }
 
-  // totals
-  const totals = {atkspd:0,eva:0,crit:0,critdmg:0,atkpct:0,demondmg:0};
-  for (const s of plan.slots){ (plan.pick[s]||[]).forEach(st=> totals[st]+=(plan.matrix[s]||{})[st]||0 ); }
-  const totLines = [
-    `ATK SPD: ${totals.atkspd.toFixed(2)}`,
-    `Evasion: ${totals.eva.toFixed(1)}%`,
-    `Crit: ${totals.crit.toFixed(1)}%`,
-    `Crit DMG: ${totals.critdmg.toFixed(0)}%`,
-    `ATK%: ${totals.atkpct.toFixed(0)}%`,
-    `Demon DMG: ${totals.demondmg.toFixed(0)}%`,
+  // Totals panel
+  const T=P.totals||{atkspd:0,eva:0,crit:0,dr:0,hp:0,def:0,atkpct:0,critdmg:0,demondmg:0,bossdmg:0};
+  ctx.fillStyle='#e8d9bb'; ctx.font='16px ui-sans-serif';
+  const tlines = [
+    `ATK SPD: ${T.atkspd.toFixed(2)}`,
+    `Evasion: ${T.eva.toFixed(1)}%`,
+    `Crit: ${T.crit.toFixed(1)}%`,
+    `Damage Reduce: ${T.dr.toFixed(1)}%`,
+    `HP: ${T.hp.toFixed(0)}%`,
+    `DEF: ${T.def.toFixed(0)}%`,
+    `Crit DMG: ${T.critdmg.toFixed(0)}%`,
+    `ATK%: ${T.atkpct.toFixed(0)}%`,
+    `Demon DMG: ${T.demondmg.toFixed(0)}%`,
+    `Boss DMG: ${T.bossdmg.toFixed(0)}%`
   ];
-  ctx.fillStyle='#e8d9bb'; ctx.font='16px ui-sans-serif';
-  for (let i=0;i<totLines.length;i++){ ctx.fillText(totLines[i], colX[1], 182+i*26); }
+  let ty = y+28;
+  tlines.forEach(line=>{ ctx.fillText(line, x2, ty); ty+=24; });
 
-  // weapon box
-  ctx.fillStyle='#e8d9bb'; ctx.font='16px ui-sans-serif';
-  if (!boss){
-    ctx.fillText(`Normal Weapon: ${wt}`, colX[2], 182);
-    ctx.fillStyle='#b7a88c'; ctx.fillText('Optimized as 8th slot', colX[2], 210);
-  } else {
-    const info = BOSS_WEAPONS[cat][wt];
-    ctx.fillText(info.name, colX[2], 182);
-    ctx.fillStyle='#b7a88c';
-    let wy=210; info.stats.forEach(s=>{ ctx.fillText(s, colX[2], wy); wy+=24; });
-    ctx.fillText(info.skill, colX[2], wy+6);
-  }
+  // Checks panel
+  const R=P.rem||{atkspd:0,eva:0,crit:0,dr:0};
+  const ck = [
+    ['ATK SPD', R.atkspd<=1e-6, R.atkspd<=1e-6?'OK':`need ${R.atkspd.toFixed(2)}`],
+    ['Evasion', R.eva<=1e-6, R.eva<=1e-6?'OK':`need ${R.eva.toFixed(1)}%`],
+    ['Crit', R.crit<=1e-6, R.crit<=1e-6?'OK':`need ${R.crit.toFixed(1)}%`],
+    ['DR', R.dr<=1e-6, R.dr<=1e-6?'OK':`need ${R.dr.toFixed(1)}%`],
+  ];
+  let cy = y+28;
+  ck.forEach(([name,ok,text])=>{
+    ctx.fillStyle = ok?'#7bd389':'#ffcf5a';
+    if (!ok && (name==='ATK SPD' ? R.atkspd>=0.05 : name==='Evasion' ? R.eva>=5 : name==='Crit' ? R.crit>=5 : name==='DR' ? R.dr>=12 : false))
+      ctx.fillStyle = '#ff7a7a';
+    ctx.fillText(`${name}: ${text}`, x3, cy); cy+=24;
+  });
 
-  // checks
-  const rem = plan.rem;
-  const chkY = C.height-120;
-  ctx.fillStyle='#e8d9bb'; ctx.font='18px ui-sans-serif';
-  ctx.fillText('Checks vs targets:', 40, chkY);
-  ctx.font='16px ui-sans-serif';
-  ctx.fillStyle = rem.atkspd<=1e-6?'#7bd389':(rem.atkspd<0.05?'#ffcf5a':'#ff7a7a');
-  ctx.fillText(`ATK SPD: ${rem.atkspd<=1e-6?'OK':`need ${rem.atkspd.toFixed(2)}`}`, 40, chkY+26);
-  ctx.fillStyle = rem.eva<=1e-6?'#7bd389':(rem.eva<5?'#ffcf5a':'#ff7a7a');
-  ctx.fillText(`Evasion: ${rem.eva<=1e-6?'OK':`need ${rem.eva.toFixed(1)}%`}`, 220, chkY+26);
-  ctx.fillStyle = rem.crit<=1e-6?'#7bd389':(rem.crit<5?'#ffcf5a':'#ff7a7a');
-  ctx.fillText(`Crit: ${rem.crit<=1e-6?'OK':`need ${rem.crit.toFixed(1)}%`}`, 410, chkY+26);
-
-  // footer
-  ctx.fillStyle='#b7a88c'; ctx.fillText('Guild — Rediscover Alliance • Creator — SAGE', 40, C.height-40);
+  // Footer
+  ctx.fillStyle='#b7a88c';
+  ctx.fillText('Guild — Rediscover Alliance • Creator — SAGE', 40, C.height-40);
 }
 
-/* ===========================
-   Events
-=========================== */
-document.getElementById('run').onclick = ()=> optimize();
-document.getElementById('render').onclick = ()=>{
-  if (!window.__plan) optimize();
-  renderCard(window.__plan);
-};
+document.getElementById('run').onclick = optimize;
+document.getElementById('render').onclick = ()=>{ if(!window.__plan){ optimize(); } renderCard(); };
 document.getElementById('save').onclick = ()=>{
   const a=document.createElement('a');
   a.download='rediscover_build.png';
