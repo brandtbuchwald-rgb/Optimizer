@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Rediscover Build Optimizer</title>
+<style>
+  body { margin:0; background:#1b130d; color:#e8d9bb;
+         font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif }
+  h1 { font-size:18px; margin:16px 12px }
+  .wrap { max-width:1100px; margin:0 auto; padding:8px }
+  .panel { background:#2a2119; border:1px solid #504230; border-radius:10px; padding:12px; margin:8px }
+  label { display:block; font-size:12px; color:#b7a88c; margin:4px 0 }
+  select,input { padding:6px; border-radius:6px; border:1px solid #d6c7a6; background:#21170f; color:#e8d9bb }
+  table { border-collapse:collapse; width:100% }
+  th,td { border-bottom:1px solid #3a2f24; padding:6px; font-size:12px }
+  .btn { border:1px solid #d6c7a6; background:#23190f; color:#e8d9bb; padding:8px 12px; border-radius:8px; cursor:pointer; margin:4px }
+  canvas { max-width:100%; margin:10px auto; display:block; border:1px solid #402f22; border-radius:12px }
+</style>
+</head>
+<body>
+<h1>Rediscover Build Optimizer</h1>
+<div class="wrap">
+
+  <!-- Weapon selection -->
+  <div class="panel">
+    <label>Weapon Category</label>
+    <select id="weaponCat">
+      <option value="normal">Normal</option>
+      <option value="glacial">Glacial</option>
+      <option value="blaze">Blaze</option>
+      <option value="darkness">Darkness</option>
+      <option value="venom">Venom</option>
+    </select>
+
+    <label>Weapon Type</label>
+    <select id="weaponType"></select>
+  </div>
+
+  <!-- Targets -->
+  <div class="panel">
+    <label>Target ATK SPD</label>
+    <input id="t_atkspd" type="number" step="0.01" value="0.25">
+    <label>Target Evasion % (cap 40%)</label>
+    <input id="t_eva" type="number" step="1" value="40">
+    <label>Target Crit % (cap 50%)</label>
+    <input id="t_crit" type="number" step="1" value="50">
+  </div>
+
+  <!-- Optimization -->
+  <div class="panel">
+    <button class="btn" id="run">Optimize</button>
+    <button class="btn" id="render">Render Picture</button>
+    <button class="btn" id="save">Download PNG</button>
+    <div id="status"></div>
+  </div>
+
+  <!-- Results -->
+  <div class="panel">
+    <strong>Result</strong>
+    <div id="result">—</div>
+  </div>
+
+  <!-- Card -->
+  <div class="panel">
+    <canvas id="card" width="1200" height="800"></canvas>
+  </div>
+
+</div>
+
+<script>
+const BASESLOTS = ["Helm","Chest","Gloves","Boots","Belt","Ring","Necklace"];
+
+// Weapon DB
+const WEAPONS = {
+  normal: {
+    Primal:{type:"normal"}, Abyss:{type:"normal"},
+    Chaos:{type:"normal"}, Original:{type:"normal"}
+  },
+  glacial: {
+    Sword:{type:"boss", name:"Glacial Sword",
+           stats:["ATK% +14–26","Damage to Monsters +25–40","Crit Damage +25–40"],
+           skill:"Chance to cast Rampage"},
+    Bow:{type:"boss", name:"Glacial Bow",
+           stats:["ATK% +14–26","Damage to Monsters +25–40","Crit Damage +25–40"],
+           skill:"Chance to cast Frozen Soul"},
+    Staff:{type:"boss", name:"Glacial Staff",
+           stats:["ATK% +14–26","Damage to Monsters +25–40","Crit Damage +25–40"],
+           skill:"Chance to cast Frozen Soul"}
+  },
+  blaze: {
+    Hammer:{type:"boss", name:"Blaze Hammer",
+           stats:["ATK% +14–26","Damage to Monsters +25–40","Crit Damage +25–40"],
+           skill:"Chance to cast Dragon’s Rage"},
+    Staff:{type:"boss", name:"Blaze Staff",
+           stats:["ATK% +14–26","Damage to Monsters +25–40","Crit Damage +25–40"],
+           skill:"Chance to cast Primordial Power"}
+  },
+  darkness: {
+    Sword:{type:"boss", name:"Darkness Sword",
+           stats:["ATK% +11–23","Damage to Monsters +20–35"],
+           skill:"Chance to cast Dark Fissure"},
+    Hammer:{type:"boss", name:"Darkness Hammer",
+           stats:["ATK% +11–23","Damage to Monsters +20–35"],
+           skill:"Chance to cast Dark Lightning"},
+    Bow:{type:"boss", name:"Darkness Bow",
+           stats:["ATK% +11–23","Damage to Monsters +20–35"],
+           skill:"Chance to cast Feather Shot"},
+    Staff:{type:"boss", name:"Darkness Staff",
+           stats:["ATK% +11–23","Damage to Monsters +20–35"],
+           skill:"Chance to cast Soul Eater"}
+  },
+  venom: {
+    Blade:{type:"boss", name:"Venom Blade",
+           stats:["ATK% +11–23","Damage to Monsters +20–35"],
+           skill:"Chance to x3 Damage"},
+    Scythe:{type:"boss", name:"Venom Scythe",
+           stats:["ATK% +11–23","Damage to Monsters +20–35"],
+           skill:"Chance to cast Poison Aura"},
+    Bow:{type:"boss", name:"Venom Bow",
+           stats:["ATK% +11–23","Damage to Monsters +20–35"],
+           skill:"Chance to cast Venom Rain"},
+    Staff:{type:"boss", name:"Venom Staff",
+           stats:["ATK% +11–23","Damage to Monsters +20–35"],
+           skill:"Chance to cast Devour"}
+  }
+};
+
+// build type dropdown
+const catSel = document.getElementById("weaponCat");
+const typeSel = document.getElementById("weaponType");
+function updateTypes(){
+  const cat = catSel.value;
+  typeSel.innerHTML="";
+  Object.keys(WEAPONS[cat]).forEach(k=>{
+    const opt=document.createElement("option");
+    opt.value=k; opt.textContent=k;
+    typeSel.appendChild(opt);
+  });
+}
+catSel.onchange=updateTypes;
+updateTypes();
+
+// Optimize (placeholder demo)
+document.getElementById("run").onclick=()=>{
+  const cat=catSel.value, wt=typeSel.value;
+  const w=WEAPONS[cat][wt];
+  let res="";
+  if(w.type==="normal"){
+    res="8-slot optimization (weapon included)";
+  } else {
+    res=`7-slot optimization + ${w.name}<br>${w.stats.join(", ")}<br>${w.skill}`;
+  }
+  document.getElementById("result").innerHTML=res;
+};
+
+// Render card (simplified demo)
+document.getElementById("render").onclick=()=>{
+  const cat=catSel.value, wt=typeSel.value;
+  const w=WEAPONS[cat][wt];
+  const C=document.getElementById("card"), ctx=C.getContext("2d");
+  ctx.fillStyle="#1b130d"; ctx.fillRect(0,0,C.width,C.height);
+  ctx.fillStyle="#e8d9bb"; ctx.font="24px sans-serif";
+  ctx.fillText("Rediscover Build Card",40,50);
+  if(w.type==="boss"){
+    ctx.fillText("Weapon: "+w.name,40,100);
+    let y=130; ctx.font="18px sans-serif"; ctx.fillStyle="#b7a88c";
+    w.stats.forEach(s=>{ ctx.fillText(s,60,y); y+=24; });
+    ctx.fillText(w.skill,60,y+10);
+  } else {
+    ctx.fillText("Normal weapon (optimized slot)",40,100);
+  }
+};
+
+// Save card
+document.getElementById("save").onclick=()=>{
+  const a=document.createElement("a");
+  a.download="build.png";
+  a.href=document.getElementById("card").toDataURL("image/png");
+  a.click();
+};
+</script>
+</body>
+</html>
